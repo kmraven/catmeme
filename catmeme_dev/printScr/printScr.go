@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"syscall"
 	"time"
 	"unsafe"
 
 	"github.com/TheZoraiz/ascii-image-converter/aic_package"
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -17,9 +17,6 @@ import (
 // 色付き出力
 
 func main() {
-	sigint := make(chan os.Signal, 1)
-	signal.Notify(sigint, syscall.SIGTERM)
-
 	// get size of screen
 	w, h, err := getTerminalSize()
 	if err != nil {
@@ -28,14 +25,18 @@ func main() {
 
 	// setup tview
 	app := tview.NewApplication()
-	screen := tview.NewTextView().SetScrollable(false).SetTextAlign(tview.AlignCenter)
+	screen := tview.NewTextView().SetScrollable(false).SetTextAlign(tview.AlignCenter).SetDynamicColors(true)
 	screen.SetChangedFunc(func() {
 		app.Draw()
 	})
+	ignoreKeys := func(event *tcell.EventKey) *tcell.EventKey {
+		return nil
+	}
+	app.SetInputCapture(ignoreKeys)
 
 	fps := 20
 	delay := time.Duration(float64(time.Second) / float64(fps))
-	seconds := 2
+	seconds := 5
 	frameDir := "frames/cat_meme"
 	go func() {
 		for i := 0; i < fps*seconds; i++ {
@@ -43,7 +44,8 @@ func main() {
 			if asciiArt, err := processImage(inputFilePath, w-1, h-1); err != nil {
 				fmt.Printf("Error processing image %s: %v\n", inputFilePath, err)
 			} else {
-				screen.SetText(asciiArt)
+				tmp := tview.TranslateANSI(asciiArt)
+				screen.SetText(tmp)
 			}
 			time.Sleep(delay)
 		}
@@ -60,10 +62,8 @@ func processImage(inputPath string, w, h int) (string, error) {
 	flags := aic_package.DefaultFlags()
 	flags.Dimensions = []int{w, h}
 	// flags.Colored = true
-	// flags.SaveTxtPath = "."
-	// flags.SaveBackgroundColor = [4]int{}
-	// flags.SaveGifPath = "ascii_arts"
 	asciiArt, err := aic_package.Convert(inputPath, flags)
+	// os.WriteFile("./txt/tmp.txt", []byte(asciiArt), 0644)
 
 	return asciiArt, err
 }
