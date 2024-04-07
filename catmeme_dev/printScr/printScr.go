@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -9,55 +10,67 @@ import (
 	"time"
 
 	"github.com/TheZoraiz/ascii-image-converter/aic_package"
-	"github.com/errnoh/gocurse/curses"
+	"github.com/gdamore/tcell"
 )
 
 func main() {
 	// 初期化
-	stdscr, err := curses.Initscr()
+	s, err := tcell.NewScreen()
 	if err != nil {
-		fmt.Println("Curses init error:", err)
-		return
+		log.Fatalf("%+v", err)
 	}
-	defer curses.Endwin()
+	if err := s.Init(); err != nil {
+		log.Fatalf("%+v", err)
+	}
+	defer s.Fini()
+	w, h := s.Size()
+
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, syscall.SIGINT)
-	curses.Noecho()
-	// curses.Start_color()
 
 	// 毎秒20ファイルずつ5秒間出力する
 	fps := 20
 	delay := time.Duration(float64(time.Second) / float64(fps))
-	seconds := 5
+	seconds := 2
 	frameDir := "frames/cat_meme"
 	for i := 0; i < fps*seconds; i++ {
 		inputFilePath := filepath.Join(frameDir, fmt.Sprintf("cat_meme_%04d.jpg", i+1))
-		if asciiArt, err := processImage(inputFilePath); err != nil {
+		if asciiArt, err := processImage(inputFilePath, w-1, h-1); err != nil {
 			fmt.Printf("Error processing image %s: %v\n", inputFilePath, err)
 		} else {
-			stdscr.Clear()
-			// stdscr.Move(0, 0)
-			stdscr.Addstr(0, 0, asciiArt, 0)
-			// stdscr.Addstr(0, 0, fmt.Sprintf("%v, %v\n", sec, i), 0)
-			stdscr.Refresh()
-			// 次の秒へ進むまで待機
+			s.Clear()
+			drawText(s, 0, 0, w, h, tcell.StyleDefault, asciiArt)
+			s.Show()
 			time.Sleep(delay)
 		}
 	}
 }
 
+func drawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string) {
+	row := y1
+	col := x1
+	for _, r := range []rune(text) {
+		s.SetContent(col, row, r, nil, style)
+		col++
+		if col >= x2 {
+			row++
+			col = x1
+		}
+		if row > y2 {
+			break
+		}
+	}
+}
+
 // 画像ファイルに特定の処理を行う関数（ここでは例としてコピーのみ）
-func processImage(inputPath string) (string, error) {
+func processImage(inputPath string, w, h int) (string, error) {
 	flags := aic_package.DefaultFlags()
-	// flags.Dimensions = []int{100, 30}
-	flags.Colored = false
-	// flags.Width = 1000
-	// flags.Height = 600
+	flags.Dimensions = []int{w, h}
+	// flags.Colored = true
 	// flags.SaveTxtPath = "."
 	// flags.CustomMap = " .-=+#@"
-	// flags.SaveBackgroundColor = [4]int{50, 50, 50, 100}
+	// flags.SaveBackgroundColor = [4]int{}
 	// flags.SaveGifPath = "ascii_arts"
-	// Conversion for an image
 	asciiArt, err := aic_package.Convert(inputPath, flags)
 
 	return asciiArt, err
