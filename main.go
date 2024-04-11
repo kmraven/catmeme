@@ -19,17 +19,16 @@ import (
 )
 
 const (
-	fps          = 20
+	fps          = 10
 	frameDir     = "frames"
 	tmpVideoName = "cat_meme"
-	seconds      = 5
+	seconds      = 3
 )
 
 //go:embed frames/*
 var files embed.FS
 
 // 元素材を整える (trim, fps調整, frame数減らす)
-// 存在するフレームを指定秒数ループする処理に変更
 // 素材増やす, ランダム処理追加
 
 func main() {
@@ -58,21 +57,43 @@ func main() {
 	}
 	app.SetInputCapture(ignoreKeys)
 
-	delay := time.Duration(float64(time.Second) / float64(fps))
+	// setup timer
+	ticker := time.NewTicker(time.Second / time.Duration(fps))
+	defer ticker.Stop()
+	loopTimer := time.NewTimer(seconds * time.Second)
+	defer loopTimer.Stop()
+
+	// count filenum
+	filenum := 0
+	if f, err := files.ReadDir(filepath.Join(frameDir, tmpVideoName)); err != nil {
+		panic(err)
+	} else {
+		filenum = len(f)
+	}
+	filecounter := 1
+
 	go func() {
-		for i := 0; i < fps*seconds; i++ {
-			inputFilePath := filepath.Join(frameDir, tmpVideoName, fmt.Sprintf("cat_meme_%04d.jpg", i+1))
-			if asciiArt, err := processImage(inputFilePath, w, h, *coloredFlag); err != nil {
-				fmt.Printf("[Error processingImage func] %s: %v\n", inputFilePath, err)
-			} else {
-				if *coloredFlag {
-					asciiArt = tview.TranslateANSI(asciiArt)
+		for {
+			select {
+			case <-ticker.C:
+				inputFilePath := filepath.Join(frameDir, tmpVideoName, fmt.Sprintf("cat_meme_%04d.jpg", filecounter))
+				if asciiArt, err := processImage(inputFilePath, w, h, *coloredFlag); err != nil {
+					fmt.Printf("[Error processingImage func] %s: %v\n", inputFilePath, err)
+				} else {
+					if *coloredFlag {
+						asciiArt = tview.TranslateANSI(asciiArt)
+					}
+					screen.SetText(asciiArt)
 				}
-				screen.SetText(asciiArt)
+				filecounter++
+				if filecounter > filenum {
+					filecounter = 1
+				}
+			case <-loopTimer.C:
+				app.Stop()
+				return
 			}
-			time.Sleep(delay)
 		}
-		app.Stop()
 	}()
 
 	if err := app.SetRoot(screen, true).Run(); err != nil {
@@ -97,13 +118,14 @@ func getTerminalSize() (width, height int, err error) {
 	return
 }
 
+// clone of aic_package, for use embed files
 func processImage(inputPath string, w, h int, coloredFlag bool) (string, error) {
+	// do not use font color! because temporary 'flattenAscii' func can not work with it.
 	flags := aic_package.DefaultFlags()
 	flags.Dimensions = []int{w, h}
 	if coloredFlag {
 		flags.Colored = true
 	}
-	// do not use font color! because temporary 'flattenAscii' func can not work with it.
 
 	localImg, err := files.Open(inputPath)
 	if err != nil {
