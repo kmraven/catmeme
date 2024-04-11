@@ -5,3 +5,5 @@ Python 3.9.16
 % pip install --upgrade pip && pip install -r requirements.txtpip 
 % python videoConv.py [video_files]
 % deactivate
+
+% export GITHUB_TOKEN="<MY_TOKEN_HERE>"
