@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	FPS                   = 10
+	FPS                   = 20
 	FRAME_DIR             = "frames"
 	DEFAULT_TIME_DURATION = 3
 )
@@ -28,8 +28,8 @@ const (
 //go:embed frames/*
 var files embed.FS
 
-// 元素材を整える (trim, fps調整, frame数減らす)
-// 素材増やす, ランダム処理追加
+// 元素材を整える (trim, frame数減らす)
+// 素材増やす
 
 func main() {
 	var (
@@ -90,7 +90,7 @@ func main() {
 		for {
 			select {
 			case <-ticker.C:
-				inputFilePath := filepath.Join(FRAME_DIR, contentName, fmt.Sprintf("cat_meme_%04d.jpg", filecounter))
+				inputFilePath := filepath.Join(FRAME_DIR, contentName, fmt.Sprintf("frame_%04d.jpg", filecounter))
 				if asciiArt, err := processImage(inputFilePath, w, h, *coloredFlag); err != nil {
 					fmt.Printf("[Error processingImage func] %s: %v\n", inputFilePath, err)
 				} else {
@@ -134,7 +134,7 @@ func getTerminalSize() (width, height int, err error) {
 
 // clone of aic_package, for use embed files
 func processImage(inputPath string, w, h int, coloredFlag bool) (string, error) {
-	// do not use font color! because temporary 'flattenAscii' func can not work with it.
+	// do not use 'font color'! because temporary 'flattenAscii' func can not work with it.
 	flags := aic_package.DefaultFlags()
 	flags.Dimensions = []int{w, h}
 	if coloredFlag {
