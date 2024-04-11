@@ -9,9 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
-	"unsafe"
 
 	"github.com/TheZoraiz/ascii-image-converter/aic_package"
 	imgManip "github.com/TheZoraiz/ascii-image-converter/image_manipulation"
@@ -118,23 +116,6 @@ func main() {
 	if err := app.SetRoot(screen, true).Run(); err != nil {
 		panic(err)
 	}
-}
-
-func getTerminalSize() (width, height int, err error) {
-	var dimensions [4]uint16
-	_, _, errno := syscall.Syscall(
-		syscall.SYS_IOCTL,
-		os.Stdout.Fd(),
-		syscall.TIOCGWINSZ,
-		uintptr(unsafe.Pointer(&dimensions)),
-	)
-	if errno != 0 {
-		err = errno
-		return
-	}
-	width = int(dimensions[1])
-	height = int(dimensions[0])
-	return
 }
 
 // clone of aic_package, for use embed files
