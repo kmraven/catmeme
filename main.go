@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,10 +20,9 @@ import (
 )
 
 const (
-	fps          = 10
-	frameDir     = "frames"
-	tmpVideoName = "cat_meme"
-	seconds      = 3
+	FPS                   = 10
+	FRAME_DIR             = "frames"
+	DEFAULT_TIME_DURATION = 3
 )
 
 //go:embed frames/*
@@ -33,7 +33,8 @@ var files embed.FS
 
 func main() {
 	var (
-		coloredFlag = flag.Bool("c", false, "colored flag")
+		coloredFlag  = flag.Bool("c", false, "colored flag")
+		timeDuration = flag.Int("t", DEFAULT_TIME_DURATION, "time duration (sec)")
 	)
 	flag.Parse()
 
@@ -58,14 +59,27 @@ func main() {
 	app.SetInputCapture(ignoreKeys)
 
 	// setup timer
-	ticker := time.NewTicker(time.Second / time.Duration(fps))
+	ticker := time.NewTicker(time.Second / time.Duration(FPS))
 	defer ticker.Stop()
-	loopTimer := time.NewTimer(seconds * time.Second)
+	loopTimer := time.NewTimer(time.Duration(*timeDuration) * time.Second)
 	defer loopTimer.Stop()
+
+	// select kind of cat meme
+	entries, err := files.ReadDir(FRAME_DIR)
+	if err != nil {
+		panic(err)
+	}
+	var dirs []os.DirEntry
+	for _, entry := range entries {
+		if entry.IsDir() {
+			dirs = append(dirs, entry)
+		}
+	}
+	contentName := dirs[rand.Intn(len(dirs))].Name()
 
 	// count filenum
 	filenum := 0
-	if f, err := files.ReadDir(filepath.Join(frameDir, tmpVideoName)); err != nil {
+	if f, err := files.ReadDir(filepath.Join(FRAME_DIR, contentName)); err != nil {
 		panic(err)
 	} else {
 		filenum = len(f)
@@ -76,7 +90,7 @@ func main() {
 		for {
 			select {
 			case <-ticker.C:
-				inputFilePath := filepath.Join(frameDir, tmpVideoName, fmt.Sprintf("cat_meme_%04d.jpg", filecounter))
+				inputFilePath := filepath.Join(FRAME_DIR, contentName, fmt.Sprintf("cat_meme_%04d.jpg", filecounter))
 				if asciiArt, err := processImage(inputFilePath, w, h, *coloredFlag); err != nil {
 					fmt.Printf("[Error processingImage func] %s: %v\n", inputFilePath, err)
 				} else {
