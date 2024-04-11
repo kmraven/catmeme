@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"flag"
 	"fmt"
 	"image"
 	"os"
@@ -21,6 +22,7 @@ const (
 	fps          = 20
 	frameDir     = "frames"
 	tmpVideoName = "cat_meme"
+	seconds      = 5
 )
 
 //go:embed frames/*
@@ -31,6 +33,11 @@ var files embed.FS
 // 素材増やす, ランダム処理追加
 
 func main() {
+	var (
+		coloredFlag = flag.Bool("c", false, "colored flag")
+	)
+	flag.Parse()
+
 	// get size of screen
 	w, h, err := getTerminalSize()
 	if err != nil {
@@ -40,7 +47,9 @@ func main() {
 	// setup tview
 	app := tview.NewApplication()
 	screen := tview.NewTextView().SetScrollable(false).SetTextAlign(tview.AlignCenter)
-	// screen = screen.SetDynamicColors(true) // if color
+	if *coloredFlag {
+		screen = screen.SetDynamicColors(true)
+	}
 	screen.SetChangedFunc(func() {
 		app.Draw()
 	})
@@ -50,14 +59,15 @@ func main() {
 	app.SetInputCapture(ignoreKeys)
 
 	delay := time.Duration(float64(time.Second) / float64(fps))
-	seconds := 5
 	go func() {
 		for i := 0; i < fps*seconds; i++ {
 			inputFilePath := filepath.Join(frameDir, tmpVideoName, fmt.Sprintf("cat_meme_%04d.jpg", i+1))
-			if asciiArt, err := processImage(inputFilePath, w, h); err != nil {
+			if asciiArt, err := processImage(inputFilePath, w, h, *coloredFlag); err != nil {
 				fmt.Printf("[Error processingImage func] %s: %v\n", inputFilePath, err)
 			} else {
-				// asciiArt := tview.TranslateANSI(asciiArt) // if color
+				if *coloredFlag {
+					asciiArt = tview.TranslateANSI(asciiArt)
+				}
 				screen.SetText(asciiArt)
 			}
 			time.Sleep(delay)
@@ -87,10 +97,12 @@ func getTerminalSize() (width, height int, err error) {
 	return
 }
 
-func processImage(inputPath string, w, h int) (string, error) {
+func processImage(inputPath string, w, h int, coloredFlag bool) (string, error) {
 	flags := aic_package.DefaultFlags()
 	flags.Dimensions = []int{w, h}
-	// flags.Colored = true // if color
+	if coloredFlag {
+		flags.Colored = true
+	}
 	// do not use font color! because temporary 'flattenAscii' func can not work with it.
 
 	localImg, err := files.Open(inputPath)
@@ -104,7 +116,10 @@ func processImage(inputPath string, w, h int) (string, error) {
 		return "", fmt.Errorf("can't decode %v: %v", inputPath, err)
 	}
 
-	imgSet, err := imgManip.ConvertToAsciiPixels(imData, flags.Dimensions, flags.Width, flags.Height, flags.FlipX, flags.FlipY, flags.Full, flags.Braille, flags.Dither)
+	imgSet, err := imgManip.ConvertToAsciiPixels(
+		imData, flags.Dimensions, flags.Width, flags.Height,
+		flags.FlipX, flags.FlipY, flags.Full, flags.Braille, flags.Dither,
+	)
 	if err != nil {
 		return "", err
 	}
@@ -112,9 +127,15 @@ func processImage(inputPath string, w, h int) (string, error) {
 	var asciiSet [][]imgManip.AsciiChar
 
 	if flags.Braille {
-		asciiSet, err = imgManip.ConvertToBrailleChars(imgSet, flags.Negative, flags.Colored, flags.Grayscale, flags.CharBackgroundColor, flags.FontColor, flags.Threshold)
+		asciiSet, err = imgManip.ConvertToBrailleChars(
+			imgSet, flags.Negative, flags.Colored, flags.Grayscale,
+			flags.CharBackgroundColor, flags.FontColor, flags.Threshold,
+		)
 	} else {
-		asciiSet, err = imgManip.ConvertToAsciiChars(imgSet, flags.Negative, flags.Colored, flags.Grayscale, flags.Complex, flags.CharBackgroundColor, flags.CustomMap, flags.FontColor)
+		asciiSet, err = imgManip.ConvertToAsciiChars(
+			imgSet, flags.Negative, flags.Colored, flags.Grayscale, flags.Complex,
+			flags.CharBackgroundColor, flags.CustomMap, flags.FontColor,
+		)
 	}
 	if err != nil {
 		return "", err
@@ -123,7 +144,6 @@ func processImage(inputPath string, w, h int) (string, error) {
 	ascii := flattenAscii(asciiSet, flags.Colored || flags.Grayscale, false)
 	result := strings.Join(ascii, "\n")
 
-	// os.WriteFile("./txt/tmp.txt", []byte(result), 0644)
 	return result, nil
 }
 
