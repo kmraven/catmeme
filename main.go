@@ -39,10 +39,15 @@ func main() {
 	flag.Parse()
 
 	// get size of screen
-	w, h, err := getTerminalSize()
+	screen_, err := tcell.NewScreen()
 	if err != nil {
 		panic(err)
 	}
+	if err := screen_.Init(); err != nil {
+		panic(err)
+	}
+	w, h := screen_.Size()
+	screen_.Fini()
 
 	// setup tview
 	app := tview.NewApplication()
