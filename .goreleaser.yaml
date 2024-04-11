@@ -19,11 +19,9 @@ builds:
   - env:
       - CGO_ENABLED=0
     goos:
-      - linux/amd64
-      - linux/arm64
-      - windows/amd64
-      - darwin/amd64
-      - darwin/arm64
+      - linux
+      - windows
+      - darwin
 
 archives:
   - format: tar.gz
