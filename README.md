@@ -17,11 +17,11 @@ The default display time is 3 seconds.
 https://github.com/kmraven/catmeme/assets/128337097/249011cf-42bc-4a8c-9846-66d36c54ed26
 
 ## How to use
-From the [release page](https://github.com/kmraven/catmeme/releases/tag/v0.0.0), select the URL of the program that matches your environment and download it.
+From the [release page](https://github.com/kmraven/catmeme/releases), select the URL of the program that matches your environment and download it.
 For example, Mac(arm) user can download with the following commands.
 ```
-% curl -sLO https://github.com/kmraven/catmeme/releases/download/v0.0.0/catmeme_Darwin_arm64.tar.gz
-% tar -xvf catmeme_Darwin_arm64.tar.gz
+% curl -LO https://github.com/kmraven/catmeme/releases/download/v0.0.0/catmeme_Darwin_arm64.tar.gz
+% tar xvf catmeme_Darwin_arm64.tar.gz
 % ./catmeme [options]
 ```
 
