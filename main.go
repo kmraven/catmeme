@@ -26,9 +26,6 @@ const (
 //go:embed frames/*
 var files embed.FS
 
-// 元素材を整える (trim, frame数減らす)
-// 素材増やす
-
 func main() {
 	var (
 		coloredFlag  = flag.Bool("c", false, "colored flag")
@@ -61,12 +58,6 @@ func main() {
 	}
 	app.SetInputCapture(ignoreKeys)
 
-	// setup timer
-	ticker := time.NewTicker(time.Second / time.Duration(FPS))
-	defer ticker.Stop()
-	loopTimer := time.NewTimer(time.Duration(*timeDuration) * time.Second)
-	defer loopTimer.Stop()
-
 	// select kind of cat meme
 	entries, err := files.ReadDir(FRAME_DIR)
 	if err != nil {
@@ -79,6 +70,12 @@ func main() {
 		}
 	}
 	contentName := dirs[rand.Intn(len(dirs))].Name()
+
+	// setup timer
+	ticker := time.NewTicker(time.Second / time.Duration(FPS))
+	defer ticker.Stop()
+	loopTimer := time.NewTimer(time.Duration(*timeDuration) * time.Second)
+	defer loopTimer.Stop()
 
 	// count filenum
 	filenum := 0
@@ -124,7 +121,9 @@ func processImage(inputPath string, w, h int, coloredFlag bool) (string, error) 
 	flags := aic_package.DefaultFlags()
 	flags.Dimensions = []int{w, h}
 	if coloredFlag {
+		flags.CharBackgroundColor = true
 		flags.Colored = true
+		flags.CustomMap = " "
 	}
 
 	localImg, err := files.Open(inputPath)

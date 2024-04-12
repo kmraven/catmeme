@@ -10,10 +10,7 @@ version: 1
 
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
-    # you may remove this if you don't need go generate
-    - go generate ./...
 
 builds:
   - env:
@@ -37,10 +34,8 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+    files:
+      - nothing*
 
 changelog:
-  sort: asc
-  filters:
-    exclude:
-      - "^docs:"
-      - "^test:"
+  skip: true
