@@ -1,28 +1,35 @@
-# `catmeme` : Instead of `cat` commamd!?
-`catmeme` is a joke command to display ASCII art of cat meme on console.
-Like the [sl](https://github.com/mtoyoda/sl) command, any keystrokes are disabled during execution, so you must settle down to watch the cat meme.
+# `catmeme` : Instead of the `cat` commamd!?
+`catmeme` is a joke command that displays ASCII art of a cat meme on the console.
+Just like the [sl](https://github.com/mtoyoda/sl) command, all key inputs are disabled while it's running, so you have no choice but to sit back and enjoy the cat meme calmly.
 
 ## Preview
 https://github.com/kmraven/catmeme/assets/128337097/dbed3245-c820-47fa-b8b2-e3dad3a9af32
 
 ### `-c` option
-With the -c option, the cat meme is displayed in color.  
+Adding the -c option displays the cat meme in color.  
 
 https://github.com/kmraven/catmeme/assets/128337097/060e1872-f15f-44d4-a4b0-2520ea200c17
 
 ### `-t` option
-By specifying a number after the -t option, the cat meme is displayed for that number of seconds.
-The default display time is 3 seconds.  
+When you specify a number after the -t option, the cat meme will be displayed for that duration in seconds. The default display time is 3 seconds.  
 
 https://github.com/kmraven/catmeme/assets/128337097/249011cf-42bc-4a8c-9846-66d36c54ed26
 
 ## How to use
-From the [release page](https://github.com/kmraven/catmeme/releases), select the URL of the program that matches your environment and download it.
-For example, Mac(arm) user can download with the following commands.
+Please select the URL for the program that suits your environment from the [release page](https://github.com/kmraven/catmeme/releases) and download it.
+For example, if you are using Mac (arm), you can download it using the following command.
 ```
 % curl -LO https://github.com/kmraven/catmeme/releases/download/v0.0.0/catmeme_Darwin_arm64.tar.gz
 % tar xvf catmeme_Darwin_arm64.tar.gz
 % ./catmeme [options]
+```
+
+## For prank makers
+To provide a one-time cat meme prank, insert the following script into the target's zshrc file. This script leaves no traces, so the victim won't be able to trace where the cat meme came from.
+(This script was made by [Kei](https://github.com/Motifman). Thanks!)
+```
+function catmeme() {curl -LO https://github.com/kmraven/catmeme/releases/download/v0.0.0/catmeme_Darwin_arm64.tar.gz; tar xvf catmeme_Darwin_arm64.tar.gz; ./catmeme -c -t 10; sed -i ".aonaon" -e '/#CATMEME/d' ~/.zshrc; rm -f catmeme* *.aonaon; source ~/.zshrc; unset -f catmeme; unalias cat;} #CATMEME
+alias cat="catmeme" #CATMEME
 ```
 
 ## Development Notes
