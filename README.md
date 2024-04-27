@@ -3,6 +3,8 @@
 Just like the [sl](https://github.com/mtoyoda/sl) command, all key inputs are disabled while it's running, so you have no choice but to sit back and enjoy the cat meme calmly.
 
 ## Preview
+The resolution of the cat meme displayed depends on the console's text size.
+
 https://github.com/kmraven/catmeme/assets/128337097/dbed3245-c820-47fa-b8b2-e3dad3a9af32
 
 ### `-c` option
