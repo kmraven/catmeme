@@ -1,6 +1,6 @@
 module github.com/kmraven/catmeme
 
-go 1.22.1
+go 1.25.0
 
 require (
 	github.com/TheZoraiz/ascii-image-converter v1.13.1
@@ -23,8 +23,8 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
-	golang.org/x/image v0.18.0 // indirect
+	golang.org/x/image v0.41.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/term v0.18.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 )
